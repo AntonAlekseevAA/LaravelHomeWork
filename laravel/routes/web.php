@@ -31,7 +31,3 @@ Route::get('/{pageId}', function($pageId){
 });
 
 Route::get('comments/{pageId}', 'CommentController@index');
-
-Route::post('comments', 'CommentController@store');
-
-Route::post('comments/{commentId}/{type}', 'CommentController@update');

@@ -16,3 +16,10 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+/** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
+/** Routes for CommentController */
+
+Route::post('comments', 'CommentController@store');
+
+Route::post('comments/{commentId}/{type}', 'CommentController@update');
