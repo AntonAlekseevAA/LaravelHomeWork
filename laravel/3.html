@@ -1,0 +1,96 @@
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+
+var tree = [
+	 {
+		"name": "aa",
+		"photo_url": "",
+		"commentid": 1,
+		"comment": "Root1",
+		"votes": 7,
+		"reply": 1,
+		"votedByUser": 1,
+		"vote": "up",
+		"nodes": [
+			{
+				"name": "nasyanasya86",
+				"photo_url": null,
+				"commentid": 2,
+				"comment": "Nested1",
+				"votes": 0,
+				"votedByUser": 0,
+				"vote": 0,
+				"date": "2019-02-03 09:08:43",
+				"reply": 2,
+				"nodes": [
+				{
+					"name": "nasyanasya86",
+					"photo_url": null,
+					"commentid": 3,
+					"comment": "NestedNested1",
+					"votes": 0,
+					"votedByUser": 0,
+					"vote": 0,
+					"date": "2019-02-03 09:08:43",
+					"reply": 3
+				},
+				{
+					"name": "nasyanasya86",
+					"photo_url": null,
+					"commentid": 4,
+					"comment": "NestedNested2",
+					"votes": 0,
+					"votedByUser": 0,
+					"vote": 0,
+					"date": "2019-02-03 09:08:43",
+					"reply": 4
+				}]
+			}],
+		"date": "2019-02-02 20:01:41"
+},
+{
+	"name": "nasyanasya86",
+	"photo_url": null,
+	"commentid": 5,
+	"comment": "Root2",
+	"votes": 15,
+	"votedByUser": 0,
+	"vote": 0,
+	"date": "2019-02-03 09:08:43",
+	"reply": 5
+}];
+
+function recursive_tree(data, tag, child_wrapper, level) {
+  var html = [];
+  
+  level = level || 0;
+  child_wrapper = (child_wrapper != false) ? child_wrapper : 'ul';
+  $.each(data, function(i, obj) {
+    var el = $('<' + tag + '>');
+	
+	// Класс для комментов создам и тогда навешу
+	el.html("name: " + obj.name + "; id: " + obj.commentid + "; comment: " + obj.comment + "; " + "votes: " + obj.votes + "; " + "reply: " + obj.reply + "; " + "vote: " + obj.vote  + "; " + "date: " + obj.date + "; ");
+    if (obj.hasOwnProperty('nodes')) {
+      var wrapper = $('<' + child_wrapper + '>');
+      var els = recursive_tree(obj.nodes, tag, child_wrapper);
+      wrapper.append(els);
+      wrapper.appendTo(el);
+    }
+    html.push(el);
+  });
+  return html;
+}
+
+$(document).ready(function() {
+  var html = recursive_tree(tree, 'li', 'ul');
+  console.log(html);
+  $('#parent').append(html);
+
+});
+</script>
+	<body>
+		<h1>test</h1>
+		<ul id="parent"></ul>
+	</body>
+</html>
