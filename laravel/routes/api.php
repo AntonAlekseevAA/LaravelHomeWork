@@ -23,3 +23,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('comments', 'CommentController@store');
 
 Route::post('comments/{commentId}/{type}', 'CommentController@update');
+
+Route::get('comments/getNewComments/', 'CommentController@getNewComments');

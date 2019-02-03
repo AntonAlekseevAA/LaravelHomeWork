@@ -5,13 +5,24 @@ namespace App\Http\Controllers;
 use App\Comment;
 use App\CommentVote;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Collection;
 
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
 class CommentController extends Controller
 {
+    /* Возможно можно вообще слать сюда Date.now()*/
+    /* А если не now(), а new Date, то нужно добавлять в конце date string UTC "yyyy-MM-dd hh:mm:ss UTC"*/
+    public function getNewComments(Request $request) {
+        /* js send timestamp with ms*/
+        $timeStamp = round($request->timestamp / 1000);
+        $dateTime = Carbon::createFromTimestamp($timeStamp)->toDateTimeString();
+
+        $comments = collect(Comment::where('created_at', '>', $dateTime)->get());
+        return $comments;
+    }
+
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -125,6 +136,7 @@ class CommentController extends Controller
            ]);
        }
 
+       /**TODO Вложенность выше 1 уровня не работает*/
         $collection = collect($commentsData)->reject(function ($val, $key) use ($exludedNestedComments) {
             $currentId = $val['commentid'];
             return $exludedNestedComments->contains($currentId);
