@@ -7,6 +7,7 @@ use App\CommentVote;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
 class CommentController extends Controller
@@ -74,38 +75,40 @@ class CommentController extends Controller
 
     public function index($pageId)
     {
-        $comments = Comment::where('page_id',$pageId)->get();
-
+        $comments = collect(Comment::where('page_id',$pageId)->get());
         $commentsData = [];
+        $exludedNestedComments = collect([]);
 
        foreach ($comments as $key) {
-
            $user = User::find($key->users_id);
-
            $name = $user->name;
-
-           $replies = $this->replies($key->id);
-
            $photo = $user->first()->photo_url;
 
-           // dd($photo->photo_url);
-
+           $replies = $this->replies($key->id);
            $reply = 0;
 
            $vote = 0;
-
            $voteStatus = 0;
 
            if(Auth::user()){
                $voteByUser = CommentVote::where('comment_id',$key->id)->where('user_id',Auth::user()->id)->first();
 
                if($voteByUser){
-
                    $vote = 1;
-
                    $voteStatus = $voteByUser->vote;
 
                }
+           }
+
+           if($replies != null && sizeof($replies) > 0){
+               $reply = 1;
+
+               /** Mark replies and then exclude from result (already added in nested array) */
+               $replies->map(function ($item) {
+                   return $item['commentid'];
+               })->each(function($item) use ($exludedNestedComments) {
+                       $exludedNestedComments->push($item);
+                   });
            }
 
            array_push($commentsData,[
@@ -120,15 +123,15 @@ class CommentController extends Controller
                "replies" => $replies,
                "date" => $key->created_at->toDateTimeString()
            ]);
-
-           if($replies != null && sizeof($replies) > 0){
-               $reply = 1;
-           }
        }
 
-       $collection = collect($commentsData);
+        $collection = collect($commentsData)->reject(function ($val, $key) use ($exludedNestedComments) {
+            $currentId = $val['commentid'];
+            return $exludedNestedComments->contains($currentId);
+        });
 
-       return $collection->sortBy('votes');
+        $result = $collection->sortByDesc('votes');
+        return $result;
    }
 
     protected function replies($commentId)
@@ -151,10 +154,20 @@ class CommentController extends Controller
                     $vote = 1;
                     $voteStatus = $voteByUser->vote;
                 }
+
+                array_push($replies,[
+                    "name" => $name,
+                    "photo_url" => $photo,
+                    "commentid" => $key->id,
+                    "comment" => $key->comment,
+                    "votes" => $key->votes,
+                    "votedByUser" => $vote,
+                    "vote" => $voteStatus,
+                    "date" => $key->created_at->toDateTimeString()
+                ]);
             }
 
             $collection = collect($replies);
-
             return $collection->sortBy('votes');
         }
     }
