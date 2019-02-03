@@ -14,6 +14,8 @@ class CommentController extends Controller
 {
     /* Возможно можно вообще слать сюда Date.now()*/
     /* А если не now(), а new Date, то нужно добавлять в конце date string UTC "yyyy-MM-dd hh:mm:ss UTC"*/
+
+    /* Send from client js as Date.now() */
     public function getNewComments(Request $request) {
         /* js send timestamp with ms*/
         $timeStamp = round($request->timestamp / 1000);
@@ -21,6 +23,9 @@ class CommentController extends Controller
 
         $comments = collect(Comment::where('created_at', '>', $dateTime)->get());
         return $comments;
+
+        // For debug. Then move to getAll() return value
+        // return $this->MapRefsToTree();
     }
 
     public function store(Request $request)
@@ -136,7 +141,7 @@ class CommentController extends Controller
            ]);
        }
 
-       /**TODO Вложенность выше 1 уровня не работает*/
+       /*TODO Вложенность выше 1 уровня не работает*/
         $collection = collect($commentsData)->reject(function ($val, $key) use ($exludedNestedComments) {
             $currentId = $val['commentid'];
             return $exludedNestedComments->contains($currentId);
@@ -182,5 +187,61 @@ class CommentController extends Controller
             $collection = collect($replies);
             return $collection->sortBy('votes');
         }
+    }
+
+    /**
+     * Maps parent-child relations array to tree
+     *
+     * @return array of root items with chields
+     */
+
+    //TODO Add param for select sort order
+    // Use Entity
+    public function MapRefsToTree()
+    {
+        //TODO Constraint 5 nesting level MAX*
+        $arr = array(
+            array('id' => 'root', 'parentid' => '0', 'name' => 'a'),
+            array('id' => 100, 'parentid' => 'root', 'name' => 'a'),
+            array('id' => 105, 'parentid' => 'root', 'name' => 'a'),
+            array('id' => 101, 'parentid' => 100, 'name' => 'a'),
+            array('id' => 102, 'parentid' => 101, 'name' => 'a'),
+            array('id' => 103, 'parentid' => 101, 'name' => 'a'),
+            array('id' => 76, 'parentid' => 101, 'name' => 'a'),
+            array('id' => 89, 'parentid' => 101, 'name' => 'a'),
+            array('id' => 777, 'parentid' => 101, 'name' => 'a'),
+        );
+
+        $topLevel = collect($arr)->reject(function ($val, $key) {
+            return $val['parentid'] == 0;
+        });
+
+        $new = array();
+        foreach ($arr as $a) {
+            $new[$a['parentid']][] = $a;
+        }
+        $tree = $this->createTree($new, array($arr[0]));
+        // return collect($tree)->sortByDesc('id')->toArray();
+        return collect($tree)->sortByDesc('id')->first()['children'];
+    }
+
+    /**
+     * Recursive builds hierarchy of objects
+     *
+     * @param $list list of nodes
+     * @param $parent parent node
+     * @return child nodes of parent item
+     */
+    //TODO Add param for select sort order
+    private function createTree(&$list, $parent){
+        $tree = array();
+        foreach ($parent as $k=>$l){
+            if(isset($list[$l['id']])){
+                $l['children'] = $this->createTree($list, $list[$l['id']]);
+            }
+            $tree[] = $l;
+        }
+
+        return collect($tree)->sortByDesc('id')->toArray();
     }
 }
