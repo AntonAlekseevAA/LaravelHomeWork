@@ -27,9 +27,6 @@ class CommentController extends Controller
 
         $comments = collect(Comment::where('created_at', '>', $dateTime)->get());
         return $comments;
-
-        // For debug. Then move to getAll() return value
-        // return $this->MapRefsToTree();
     }
 
     public function getNotSeenComments(Request $request) {
@@ -68,13 +65,13 @@ class CommentController extends Controller
 
         DB::transaction(function() use ($request, &$comment) {
             $comment = Comment::create($request->all());
-            
+
             $otherUsers = collect(User::select('id')->where('id', '!=', $comment->usersId())->get())->toArray();
 
             foreach ($otherUsers as $otherUser) {
                 $notSeenComment = new NotSeenComment;
                 $notSeenComment->setCommentId($comment->id);
-                $notSeenComment->setUserId($otherUser['id']); //Mock
+                $notSeenComment->setUserId($otherUser['id']);
 
                 NotSeenComment::create($notSeenComment->attributesToArray());
             }
@@ -136,14 +133,12 @@ class CommentController extends Controller
     {
         $comments = collect(Comment::where('page_id',$pageId)->get());
         $commentsData = [];
-        $exludedNestedComments = collect([]);
 
        foreach ($comments as $key) {
            $user = User::find($key->users_id);
            $name = $user->name;
 
-           $replies = $this->replies($key->id);
-           $reply = 0;
+           $reply = 0;  // Rework as nested level (1-5)
 
            $vote = 0;
            $voteStatus = 0;
@@ -158,109 +153,45 @@ class CommentController extends Controller
                }
            }
 
-           if($replies != null && sizeof($replies) > 0){
-               $reply = 1;
-
-               /** Mark replies and then exclude from result (already added in nested array) */
-               $replies->map(function ($item) {
-                   return $item['commentid'];
-               })->each(function($item) use ($exludedNestedComments) {
-                       $exludedNestedComments->push($item);
-                   });
-           }
-
            array_push($commentsData,[
                "name" => $name,
-               "commentid" => $key->id,
+               "id" => $key->id,
                "comment" => $key->comment,
                "votes" => $key->votes,
                "reply" => $reply,
                "votedByUser" =>$vote,
                "vote" =>$voteStatus,
-               "replies" => $replies,
+               "reply_id"=>$key->getReplyId(),
                "date" => $key->created_at->toDateTimeString()
            ]);
        }
 
-       /*TODO Вложенность выше 1 уровня не работает*/
-        $collection = collect($commentsData)->reject(function ($val, $key) use ($exludedNestedComments) {
-            $currentId = $val['commentid'];
-            return $exludedNestedComments->contains($currentId);
-        });
-
-        $result = $collection->sortByDesc('votes');
-        return $result;
+        return $this->MapRefsToTree($commentsData);
    }
-
-    protected function replies($commentId)
-    {
-        $comments = Comment::where('reply_id', $commentId)->get();
-        $replies = [];
-
-        foreach ($comments as $key) {
-            $user = User::find($key->users_id);
-            $name = $user->name;
-
-            $vote = 0;
-            $voteStatus = 0;
-
-            if (Auth::user()) {
-                $voteByUser = CommentVote::where('comment_id', $key->id)->where('user_id', Auth::user()->id)->first();
-
-                if ($voteByUser) {
-                    $vote = 1;
-                    $voteStatus = $voteByUser->vote;
-                }
-
-                array_push($replies,[
-                    "name" => $name,
-                    "commentid" => $key->id,
-                    "comment" => $key->comment,
-                    "votes" => $key->votes,
-                    "votedByUser" => $vote,
-                    "vote" => $voteStatus,
-                    "date" => $key->created_at->toDateTimeString()
-                ]);
-            }
-
-            $collection = collect($replies);
-            return $collection->sortBy('votes');
-        }
-    }
 
     /**
      * Maps parent-child relations array to tree
-     *
+     * @param $input array of items with parent->child relations (each child has ref to it parent)
      * @return array of root items with chields
      */
 
     //TODO Add param for select sort order
     // Use Entity
-    public function MapRefsToTree()
+    public function MapRefsToTree($input)
     {
         //TODO Constraint 5 nesting level MAX*
-        $arr = array(
-            array('id' => 'root', 'parentid' => '0', 'name' => 'a'),
-            array('id' => 100, 'parentid' => 'root', 'name' => 'a'),
-            array('id' => 105, 'parentid' => 'root', 'name' => 'a'),
-            array('id' => 101, 'parentid' => 100, 'name' => 'a'),
-            array('id' => 102, 'parentid' => 101, 'name' => 'a'),
-            array('id' => 103, 'parentid' => 101, 'name' => 'a'),
-            array('id' => 76, 'parentid' => 101, 'name' => 'a'),
-            array('id' => 89, 'parentid' => 101, 'name' => 'a'),
-            array('id' => 777, 'parentid' => 101, 'name' => 'a'),
-        );
+        // $arr = collect(Comment::get())->prepend(array('id' => '0', 'reply_id' => 'root', 'name' => 'a'))->toArray();
+        $arr = collect($input)->prepend(array('id' => '0', 'reply_id' => 'root', 'name' => 'a'))->toArray();
 
         $topLevel = collect($arr)->reject(function ($val, $key) {
-            return $val['parentid'] == 0;
+            return $val['reply_id'] == 0;
         });
 
         $new = array();
         foreach ($arr as $a) {
-            $new[$a['parentid']][] = $a;
+            $new[$a['reply_id']][] = $a;
         }
         $tree = $this->createTree($new, array($arr[0]));
-        // return collect($tree)->sortByDesc('id')->toArray();
         return collect($tree)->sortByDesc('id')->first()['children'];
     }
 

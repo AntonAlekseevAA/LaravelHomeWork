@@ -7,18 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
 class Comment extends Model
 {
-    //
-
-    /**
-
-     * Fillable fields for a course
-
-     *
-
-     * @return array
-
-     */
-
     protected $fillable = ['comment','votes','spam','reply_id','page_id','users_id'];
 
     protected $dates = ['created_at', 'updated_at'];
@@ -30,5 +18,11 @@ class Comment extends Model
 
     public function usersId() {
         return $this->attributes['users_id'];
+    }
+
+    /* Crack. replyId must return typeof(db_relation). But when builds tree we user array of int*/
+    /* Therefore, create property with different name*/
+    public function getReplyId() {
+        return $this->attributes['reply_id'];
     }
 }
