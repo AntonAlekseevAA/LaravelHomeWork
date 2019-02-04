@@ -27,4 +27,8 @@ class Comment extends Model
     {
         return $this->hasMany('App\Comment','id','reply_id');
     }
+
+    public function usersId() {
+        return $this->attributes['users_id'];
+    }
 }

@@ -70,11 +70,15 @@ class CommentController extends Controller
             $comment = Comment::create($request->all());
 
             // Foreach comments from db where user_id != currentUser insert in table NotSeenComments
-            $notSeenComment = new NotSeenComment;
-            $notSeenComment->setCommentId($comment->id);
-            $notSeenComment->setUserId(7); //Mock
+            $otherUsers = collect(User::select('id')->where('id', '!=', $comment->usersId())->get())->toArray();
 
-            NotSeenComment::create($notSeenComment->attributesToArray());
+            foreach ($otherUsers as $otherUser) {
+                $notSeenComment = new NotSeenComment;
+                $notSeenComment->setCommentId($comment->id);
+                $notSeenComment->setUserId($otherUser['id']); //Mock
+
+                NotSeenComment::create($notSeenComment->attributesToArray());
+            }
         });
 
         if($comment) {
