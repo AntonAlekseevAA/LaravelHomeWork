@@ -68,8 +68,7 @@ class CommentController extends Controller
 
         DB::transaction(function() use ($request, &$comment) {
             $comment = Comment::create($request->all());
-
-            // Foreach comments from db where user_id != currentUser insert in table NotSeenComments
+            
             $otherUsers = collect(User::select('id')->where('id', '!=', $comment->usersId())->get())->toArray();
 
             foreach ($otherUsers as $otherUser) {
