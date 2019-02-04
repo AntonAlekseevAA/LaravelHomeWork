@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Comment;
 use App\CommentVote;
+use App\NotSeenComment;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\ServiceProvider;
+use Mockery\Matcher\Not;
 
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
 class CommentController extends Controller
@@ -28,6 +32,15 @@ class CommentController extends Controller
         // return $this->MapRefsToTree();
     }
 
+    public function getNotSeenComments(Request $request) {
+        $userId = $request->userId;
+        $pageId = $request->pageId;
+        $notSeenComments = collect(NotSeenComment::all())->toArray();
+
+        return $notSeenComments;
+        // $notSeenComments = collect(NotSeenComment::where('page_id',$pageId)->get());
+    }
+
     //TODO Add Level column and if then > 5, set parent to parent of parent comment =)
     // Если по русски - если > 5 уровня, нужно посмотреть предка того, у кого 5 уровень, к которому добавляется коммент
     // И добавить к нему на уровне 5. Т.е он будет параллельно тому, к кому добавлялся.
@@ -40,11 +53,24 @@ class CommentController extends Controller
             'users_id' => 'required',
         ]);
 
-        $comment = Comment::create($request->all());
+        $comment = null;
+
+        DB::transaction(function() use ($request, &$comment) {
+            $comment = Comment::create($request->all());
+
+            // Foreach comments from db where user_id != currentUser insert in table NotSeenComments
+            $notSeenComment = new NotSeenComment;
+            $notSeenComment->setCommentId($comment->id);
+            $notSeenComment->setUserId(7); //Mock
+
+            NotSeenComment::create($notSeenComment->attributesToArray());
+        });
 
         if($comment) {
             return ["status" => "true", "commentId" => $comment->id];
         }
+
+        return ["status" => "false", "error" => "database error. Transaction failed"];
     }
 
     public function update(Request $request, $commentId, $type)

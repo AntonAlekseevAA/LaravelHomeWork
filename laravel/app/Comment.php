@@ -26,6 +26,5 @@ class Comment extends Model
     public function replies()
     {
         return $this->hasMany('App\Comment','id','reply_id');
-
     }
 }
