@@ -28,6 +28,9 @@ class CommentController extends Controller
         // return $this->MapRefsToTree();
     }
 
+    //TODO Add Level column and if then > 5, set parent to parent of parent comment =)
+    // Если по русски - если > 5 уровня, нужно посмотреть предка того, у кого 5 уровень, к которому добавляется коммент
+    // И добавить к нему на уровне 5. Т.е он будет параллельно тому, к кому добавлялся.
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -98,7 +101,6 @@ class CommentController extends Controller
        foreach ($comments as $key) {
            $user = User::find($key->users_id);
            $name = $user->name;
-           $photo = $user->first()->photo_url;
 
            $replies = $this->replies($key->id);
            $reply = 0;
@@ -129,7 +131,6 @@ class CommentController extends Controller
 
            array_push($commentsData,[
                "name" => $name,
-               "photo_url" => (string)$photo,
                "commentid" => $key->id,
                "comment" => $key->comment,
                "votes" => $key->votes,
@@ -159,7 +160,6 @@ class CommentController extends Controller
         foreach ($comments as $key) {
             $user = User::find($key->users_id);
             $name = $user->name;
-            $photo = $user->first()->photo_url;
 
             $vote = 0;
             $voteStatus = 0;
@@ -174,7 +174,6 @@ class CommentController extends Controller
 
                 array_push($replies,[
                     "name" => $name,
-                    "photo_url" => $photo,
                     "commentid" => $key->id,
                     "comment" => $key->comment,
                     "votes" => $key->votes,
