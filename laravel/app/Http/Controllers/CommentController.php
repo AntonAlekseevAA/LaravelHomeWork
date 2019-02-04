@@ -10,8 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\ServiceProvider;
-use Mockery\Matcher\Not;
+use function MongoDB\BSON\toJSON;
 
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
 class CommentController extends Controller
@@ -20,6 +19,7 @@ class CommentController extends Controller
     /* А если не now(), а new Date, то нужно добавлять в конце date string UTC "yyyy-MM-dd hh:mm:ss UTC"*/
 
     /* Send from client js as Date.now() */
+    // Maybe depricated (used NotSeenCommentsTable)
     public function getNewComments(Request $request) {
         /* js send timestamp with ms*/
         $timeStamp = round($request->timestamp / 1000);
@@ -34,11 +34,22 @@ class CommentController extends Controller
 
     public function getNotSeenComments(Request $request) {
         $userId = $request->userId;
-        $pageId = $request->pageId;
-        $notSeenComments = collect(NotSeenComment::all())->toArray();
+        $notSeenComments = collect(NotSeenComment::where('user_id', '=', $userId)->get())->toArray();
 
         return $notSeenComments;
-        // $notSeenComments = collect(NotSeenComment::where('page_id',$pageId)->get());
+    }
+
+    public function deleteSeenComment(Request $request) {
+        $userId = $request->userId;
+        $commentId = $request->commentId;
+
+        try {
+            NotSeenComment::where('user_id', '=', $userId)->where('comment_id', '=', $commentId)->delete();
+
+            return ['result' => 'true'];
+        } catch (Exception $e) {
+            return ['result' => 'false', 'error' => 'Error when delete comment'];
+        }
     }
 
     //TODO Add Level column and if then > 5, set parent to parent of parent comment =)

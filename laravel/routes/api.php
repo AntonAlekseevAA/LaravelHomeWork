@@ -26,4 +26,6 @@ Route::post('comments/{commentId}/{type}', 'CommentController@update');
 
 Route::get('comments/getNewComments/', 'CommentController@getNewComments');
 
-Route::get('comments/getNotSeenComments', 'CommentController@getNotSeenComments');
+Route::post('comments/getNotSeenComments', 'CommentController@getNotSeenComments');
+
+Route::post('comments/setSeen', 'CommentController@deleteSeenComment');
