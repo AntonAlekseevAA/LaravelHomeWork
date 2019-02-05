@@ -20,11 +20,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
 /** Routes for CommentController */
 
+Route::get('comments/getNewComments/', 'CommentController@getNewComments');
+
+Route::get('comments', 'CommentController@index');
+
 Route::post('comments', 'CommentController@store');
 
 Route::post('comments/{commentId}/{type}', 'CommentController@update');
-
-Route::get('comments/getNewComments/', 'CommentController@getNewComments');
 
 Route::post('comments/getNotSeenComments', 'CommentController@getNotSeenComments');
 

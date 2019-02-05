@@ -15,6 +15,7 @@
                     @endif
 
                     You are logged in!
+                        <a class="navbar-brand" href="<?php echo e(url('/comments')); ?>">View comments</a>
                 </div>
             </div>
         </div>

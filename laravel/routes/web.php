@@ -19,15 +19,10 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+/** Routes for CommentController public pages */
 
-/** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
-/** Routes for CommentController */
+Route::get('comments', function(){
 
-/** Надо убрать наверно роут, и оставить 1 на статичную страницу. И тогда столбец Page_id в comments тоже не нужен будет */
-Route::get('/{pageId}', function($pageId){
-
-    return view('page',['pageId' => $pageId]);
+    return view('page');
 
 });
-
-Route::get('comments/{pageId}', 'CommentController@index');

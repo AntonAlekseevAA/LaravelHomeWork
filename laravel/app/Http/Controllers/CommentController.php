@@ -146,9 +146,9 @@ class CommentController extends Controller
         }
     }
 
-    public function index($pageId)
+    public function index()
     {
-        $comments = collect(Comment::where('page_id',$pageId)->get());
+        $comments = collect(Comment::all());
         $commentsData = [];
 
        foreach ($comments as $key) {
@@ -196,8 +196,6 @@ class CommentController extends Controller
     // Use Entity
     public function MapRefsToTree($input)
     {
-        //TODO Constraint 5 nesting level MAX*
-        // $arr = collect(Comment::get())->prepend(array('id' => '0', 'reply_id' => 'root', 'name' => 'a'))->toArray();
         $arr = collect($input)->prepend(array('id' => '0', 'reply_id' => 'root', 'name' => 'a'))->toArray();
 
         $topLevel = collect($arr)->reject(function ($val, $key) {
