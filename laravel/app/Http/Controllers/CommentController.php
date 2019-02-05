@@ -49,9 +49,6 @@ class CommentController extends Controller
         }
     }
 
-    //TODO Add Level column and if then > 5, set parent to parent of parent comment =)
-    // Если по русски - если > 5 уровня, нужно посмотреть предка того, у кого 5 уровень, к которому добавляется коммент
-    // И добавить к нему на уровне 5. Т.е он будет параллельно тому, к кому добавлялся.
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -61,24 +58,44 @@ class CommentController extends Controller
             'users_id' => 'required',
         ]);
 
-        $comment = null;
+        $newComment = null;
 
-        DB::transaction(function() use ($request, &$comment) {
-            $comment = Comment::create($request->all());
+        DB::transaction(function() use ($request, &$newComment) {
+            $replyId = $request['reply_id'];
+            $parentComment = collect(Comment::where('id', '=', $replyId)->get())->first(); //Take first to determine level. Other row has some level.
 
-            $otherUsers = collect(User::select('id')->where('id', '!=', $comment->usersId())->get())->toArray();
+            $newLevel = 0;
+
+            if ($parentComment) {
+                $newLevel = $parentComment->level;
+            } else {
+                $newLevel = -1; // Crack
+            }
+
+            $newComment = new Comment($request->all());
+
+            if ($newLevel < 5) {
+                $newComment->level = $newLevel + 1;
+            } else {
+                $newComment->level = $parentComment->level;
+                $newComment->reply_id = $parentComment->getReplyId();
+            }
+
+            $newComment->save();
+
+            $otherUsers = collect(User::select('id')->where('id', '!=', $newComment->usersId())->get())->toArray();
 
             foreach ($otherUsers as $otherUser) {
                 $notSeenComment = new NotSeenComment;
-                $notSeenComment->setCommentId($comment->id);
+                $notSeenComment->setCommentId($newComment->id);
                 $notSeenComment->setUserId($otherUser['id']);
 
                 NotSeenComment::create($notSeenComment->attributesToArray());
             }
         });
 
-        if($comment) {
-            return ["status" => "true", "commentId" => $comment->id];
+        if($newComment) {
+            return ["status" => "true", "commentId" => $newComment->id];
         }
 
         return ["status" => "false", "error" => "database error. Transaction failed"];

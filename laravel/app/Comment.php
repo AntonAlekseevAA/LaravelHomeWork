@@ -25,4 +25,8 @@ class Comment extends Model
     public function getReplyId() {
         return $this->attributes['reply_id'];
     }
+
+    public function setReplyId($value) {
+        $this->attributes['reply_id'] = $value;
+    }
 }
