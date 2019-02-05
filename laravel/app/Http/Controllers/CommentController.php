@@ -54,7 +54,6 @@ class CommentController extends Controller
         $this->validate($request, [
             'comment' => 'required',
             'reply_id' => 'filled',
-            'page_id' => 'filled',
             'users_id' => 'required',
         ]);
 
@@ -103,6 +102,7 @@ class CommentController extends Controller
 
     public function update(Request $request, $commentId, $type)
     {
+        // TODO Check vote logic. And remove constraint for user votes count
         if($type == "vote"){
             $this->validate($request, [
                 'vote' => 'required',
