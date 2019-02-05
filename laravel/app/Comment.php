@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
 class Comment extends Model
 {
-    protected $fillable = ['comment','votes','reply_id','users_id'];
+    protected $fillable = ['comment','votes','reply_id','users_id', 'level'];
 
     protected $dates = ['created_at', 'updated_at'];
 

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use function MongoDB\BSON\toJSON;
+use phpDocumentor\Reflection\Types\Array_;
 
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
 class CommentController extends Controller
@@ -179,7 +180,8 @@ class CommentController extends Controller
                "votedByUser" =>$vote,
                "vote" =>$voteStatus,
                "reply_id"=>$key->getReplyId(),
-               "date" => $key->created_at->toDateTimeString()
+               "date" => $key->created_at->toDateTimeString(),
+               "level" => $key->level
            ]);
        }
 
