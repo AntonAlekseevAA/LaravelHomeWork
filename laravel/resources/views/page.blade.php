@@ -15,7 +15,7 @@
     <!------------------------>
 
     <!--Not need now -->
-    <!--<link href="css/comment.css" rel="stylesheet" type="text/css">-->
+    <link href="css/comments.css" rel="stylesheet" type="text/css">
     <div class="container">
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
@@ -28,9 +28,9 @@
                 </div>
             </div>
 
-            <div class="card-header col-md-10 text-center border border-dark">
+            <div class="card-header col-md-10 text-center border border-dark border-3">
                 Комментарии
-                <div id="comments" class="card-body">
+                <div id="comments" class="card-body border border-right border-2">
 
                 </div>
             </div>

@@ -20,11 +20,17 @@ var tree;
 	
 	for (var i in tree)
 	{
-		generatedHtml = MakeComment(tree[i], "comments");
+		generatedHtml = makeComment(tree[i], "comments");
 	}
 	
+	var userId = $('#hfUserId').attr('value');
+	
+	if (!userId) {
+		$('.btnSendComment').remove();
+	}
+});
 
-    function MakeComment(x, parentId, depth = 0) {
+function makeComment(x, parentId, depth = 0) {
 		
 		// Unique comment block id
 		var idHash = md5(x.id-x.level-Date.now()-Math.random());
@@ -35,14 +41,14 @@ var tree;
 		
         document.getElementById(parentId).innerHTML = document.getElementById(parentId).innerHTML + (`<div class="media">
             <img style="width:30px;" />
-            <div class="media-body pt-3 pl-2">
-				<div class="border">
+            <div class="media-body pt-3 pl-2" data-id="${x.id}">
+				<div class="border rounded-top rounded-top-2">
 				<img src="images/img_avatar3.png" alt="x.name" class="pt-2 pr-2 rounded-circle float-xl-right" style="width:50px;">
 				<h5 class="float-xl-right">${x.name}</h5>
-					  <small class="float-sm-left"><i>${x.date}</i></small>
+					  <small class="float-sm-left pl-2"><i>${x.date}</i></small>
 					  <p class="h6 small">${x.comment}</p>
-					  
-					  <button type="button" class="col-md-12 btn btn-dark btn-sm mt-5 btnSendComment">Comment</button>
+					  <textarea class="col-md-12 mt-5" data-id="${x.id}"></textarea>
+					  <button type="button" class="col-md-12 btn btn-dark btn-sm mt-1 mb-1 btnSendComment" onClick="createNewComment()" data-id="${x.id}">Comment</button>
 				</div>
               <div id=${idHash} class="comments"></div>
             </div>
@@ -66,8 +72,40 @@ var tree;
 		
 		for (var i in arrayComments)
 		{
-			MakeComment(arrayComments[i], parentId, depth);
+			makeComment(arrayComments[i], parentId, depth);
 		}
     }
-    
-});
+	
+/* Api requests */
+
+function createNewComment() {
+	var parentId = $(event.target).attr('data-id');
+	
+	var comment = $(`textarea[data-id="${parentId}"]`).val();
+	var userId = $('#hfUserId').attr('value');
+	
+	if (!userId) {
+		return;
+	}
+	
+	$.ajax({
+        type: 'POST',
+        url: '/api/comments/',
+        dataType: "json",
+        async:false,
+		data:
+		{
+			"users_id": userId,
+			"reply_id": parentId,
+			"comment": comment
+		}
+	})
+		.done(function(data) {
+			console.log(data);
+			tree = data;
+			// TODO Append to parent
+		})
+		.fail(function() {
+			alert( "error" );
+		});
+}
