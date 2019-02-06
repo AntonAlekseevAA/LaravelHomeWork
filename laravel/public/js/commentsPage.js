@@ -31,15 +31,18 @@ var tree;
 		
 		// TODO extract template into var
 		// static img for example. In real world we can store filename in user profile and insert path inline.
+		// <h4>${x.name} <small><i>${x.date}</i></small></h4>
 		
         document.getElementById(parentId).innerHTML = document.getElementById(parentId).innerHTML + (`<div class="media">
             <img style="width:30px;" />
-            <div class="media-body pt-3">
+            <div class="media-body pt-3 pl-2">
 				<div class="border">
-				<img src="images/img_avatar3.png" alt="x.name" class="pt-2 pl-2 rounded-circle" style="width:50px;">
-					  <h4>${x.name} <small><i>${x.date}</i></small></h4>
+				<img src="images/img_avatar3.png" alt="x.name" class="pt-2 pr-2 rounded-circle float-xl-right" style="width:50px;">
+				<h5 class="float-xl-right">${x.name}</h5>
+					  <small class="float-sm-left"><i>${x.date}</i></small>
 					  <p class="h6 small">${x.comment}</p>
-					  <button type="button" class="btn btn-dark btn-sm btnSendComment">Comment</button>
+					  
+					  <button type="button" class="col-md-12 btn btn-dark btn-sm mt-5 btnSendComment">Comment</button>
 				</div>
               <div id=${idHash} class="comments"></div>
             </div>

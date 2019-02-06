@@ -28,8 +28,14 @@
                 </div>
             </div>
 
-            <div id="comments" class="col-md-10">
+            <div class="card-header col-md-10 text-center border border-dark">
+                Комментарии
+                <div id="comments" class="card-body">
+
+                </div>
             </div>
+
+
         </div>
 
         <div class="jumbotron vertical-center">
