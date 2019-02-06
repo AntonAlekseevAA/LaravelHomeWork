@@ -147,8 +147,19 @@ class CommentController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $sortOrder = 'desc';
+        $sortField = 'date';
+
+        if ($request->sortOrder == 'asc' || $request->sortOrder == 'desc') {
+            $sortOrder = $request->sortOrder;
+        }
+
+        if ($request->sortField == 'date' || $request->sortField == 'votes') {
+            $sortField = $request->sortField;
+        }
+
         $comments = collect(Comment::all());
         $commentsData = [];
 
@@ -185,18 +196,20 @@ class CommentController extends Controller
            ]);
        }
 
-        return array_values($this->MapRefsToTree($commentsData));
+        return array_values($this->MapRefsToTree($commentsData, $sortField, $sortOrder));
    }
 
     /**
      * Maps parent-child relations array to tree
      * @param $input array of items with parent->child relations (each child has ref to it parent)
+     * @param $sortField 1 for sort
+     * @param $sortOrder 2 direction
      * @return array of root items with chields
      */
 
     //TODO Add param for select sort order
     // Use Entity
-    public function MapRefsToTree($input)
+    public function MapRefsToTree($input, $sortField, $sortOrder)
     {
         $arr = collect($input)->prepend(array('id' => '0', 'reply_id' => 'root', 'name' => 'a'))->toArray();
 
@@ -208,8 +221,11 @@ class CommentController extends Controller
         foreach ($arr as $a) {
             $new[$a['reply_id']][] = $a;
         }
-        $tree = $this->createTree($new, array($arr[0]));
-        return collect($tree)->sortByDesc('votes')->first()['children'];
+        $tree = $this->createTree($new, array($arr[0]), $sortField, $sortOrder);
+        // return collect($tree)->sortByDesc('date')->first()['children'];
+
+        $isDesc = ($sortOrder == 'desc' ? true : false);
+        return collect($tree)->sortBy($sortField, SORT_REGULAR, $isDesc)->first()['children'];
     }
 
     /**
@@ -217,18 +233,23 @@ class CommentController extends Controller
      *
      * @param $list list of nodes
      * @param $parent parent node
+     * @param $sortField 1 for sort
+     * @param $sortOrder 2 direction
      * @return child nodes of parent item
      */
     //TODO Add param for select sort order
-    private function createTree(&$list, $parent){
+    private function createTree(&$list, $parent, $sortField, $sortOrder){
         $tree = array();
         foreach ($parent as $k=>$l){
             if(isset($list[$l['id']])){
-                $l['children'] = $this->createTree($list, $list[$l['id']]);
+                $l['children'] = $this->createTree($list, $list[$l['id']], $sortField, $sortOrder);
             }
             $tree[] = $l;
         }
 
-        return array_values(collect($tree)->sortByDesc('votes')->toArray());
+        // return array_values(collect($tree)->sortByDesc('date')->toArray());
+
+        $isDesc = ($sortOrder == 'desc' ? true : false);
+        return array_values(collect($tree)->sortBy($sortField, SORT_REGULAR, $isDesc)->toArray());
     }
 }
