@@ -9,7 +9,6 @@ var tree;
         async:false,
 	})
 		.done(function(data) {
-			alert( "success" );
 			console.log(data);
 			tree = data;
 		})
@@ -26,24 +25,22 @@ var tree;
 	
 
     function MakeComment(x, parentId, depth = 0) {
-        var shift = "p-3"
-
-
-        if (depth > 2) {
-            shift = "";
-        }
-
+		
 		// Unique comment block id
 		var idHash = md5(x.id-x.level-Date.now()-Math.random());
 		
 		// TODO extract template into var
-        document.getElementById(parentId).innerHTML = document.getElementById(parentId).innerHTML + (`<div class="media ${shift}">
-            <img src="images/img_avatar3.png" alt="x.name" class="mr-3 mt-3 rounded-circle" style="width:70px;">
-            <div class="media-body">
-              <h4>${x.name} <small><i>Posted on ${x.date}</i></small></h4>
-              <p>${x.comment}</p>
-			  
-			  <button type="button" class="btn btn-dark">Comment</button>
+		// static img for example. In real world we can store filename in user profile and insert path inline.
+		
+        document.getElementById(parentId).innerHTML = document.getElementById(parentId).innerHTML + (`<div class="media">
+            <img style="width:30px;" />
+            <div class="media-body pt-3">
+				<div class="border">
+				<img src="images/img_avatar3.png" alt="x.name" class="pt-2 pl-2 rounded-circle" style="width:50px;">
+					  <h4>${x.name} <small><i>${x.date}</i></small></h4>
+					  <p class="h6 small">${x.comment}</p>
+					  <button type="button" class="btn btn-dark btn-sm btnSendComment">Comment</button>
+				</div>
               <div id=${idHash} class="comments"></div>
             </div>
           </div>`) 

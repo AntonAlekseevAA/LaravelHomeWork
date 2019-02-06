@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <div id="comments">
+            <div id="comments" class="col-md-10">
             </div>
         </div>
 
