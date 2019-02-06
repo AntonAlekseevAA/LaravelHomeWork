@@ -185,7 +185,7 @@ class CommentController extends Controller
            ]);
        }
 
-        return $this->MapRefsToTree($commentsData);
+        return array_values($this->MapRefsToTree($commentsData));
    }
 
     /**
@@ -209,7 +209,7 @@ class CommentController extends Controller
             $new[$a['reply_id']][] = $a;
         }
         $tree = $this->createTree($new, array($arr[0]));
-        return collect($tree)->sortByDesc('id')->first()['children'];
+        return collect($tree)->sortByDesc('votes')->first()['children'];
     }
 
     /**
@@ -229,6 +229,6 @@ class CommentController extends Controller
             $tree[] = $l;
         }
 
-        return collect($tree)->sortByDesc('id')->toArray();
+        return array_values(collect($tree)->sortByDesc('votes')->toArray());
     }
 }
