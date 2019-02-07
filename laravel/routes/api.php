@@ -18,10 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 /** Source: https://www.cloudways.com/blog/comment-system-laravel-vuejs/ */
-/** Routes for CommentController */
-
-// Deprecated. Remove
-/* Route::get('comments/getNewComments/', 'CommentController@getNewComments'); */
+/** Api Routes for CommentController */
 
 Route::get('comments', 'CommentController@index');
 
