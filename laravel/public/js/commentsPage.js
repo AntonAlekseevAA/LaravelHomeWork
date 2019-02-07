@@ -1,3 +1,7 @@
+var commentsContainer = `<div id="comments" class="card-body border border-right border-2 comment-block" data-id="0">
+
+						</div>`;
+
 function loadComments(sortField, sortOrder) {
     var tree;
     $.ajax({
@@ -9,6 +13,9 @@ function loadComments(sortField, sortOrder) {
         .done(function (data) {
             console.log(data);
             tree = data;
+			
+			$('.comment-wrapper').html('');
+			$('.comment-wrapper').append(commentsContainer);
         })
         .fail(function () {
             alert("error");
@@ -91,7 +98,7 @@ function makeComment(x, parentId, depth = 0) {
 				<h5 class="float-xl-right">${x.name}</h5>
 					  <small class="float-sm-left pl-2 border rounded-left"><i>${x.date}</i></small>
 					  <div class="col-md-11 mt-5 pl-2 border rounded-bottom">
-						<p class="h6" style="word-break: break-word; min-height: 15vh!important; text-align:left;">${x.comment}</p>
+						<p class="h6" style="word-break: break-word; min-height: 5vh!important; text-align:left;">${x.comment}</p>
 					  </div>
 					  
 					  <p class="votesCount ml-1" data-id="${x.id}">${x.votes} <i class="fas fa-plus-square ml-1" onclick="plusBtnClick()"></i><i class="fas fa-minus-square" onclick="minusBtnClick()"></i>
@@ -102,7 +109,7 @@ function makeComment(x, parentId, depth = 0) {
 						</div>
 					  </div
 						</p>
-					  <button type="button" class="col-md-11 btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${x.id}">Comment</button>
+					  <button type="button" class="col-md-6 float-right btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${x.id}">Comment</button>
 				</div>
               <div id=${idHash} class="comments"></div>
             </div>
@@ -178,7 +185,7 @@ function appendNested(commentid, parentId, userName, commentText) {
 				<h5 class="float-xl-right">${userName}</h5>
 					  <small class="float-sm-left pl-2 border rounded-left"><i>${Date.now()}</i></small>
 					  <div class="col-md-11 mt-5 pl-2 border rounded-bottom">
-						<p class="h6" style="word-break: break-word; min-height: 15vh!important; text-align:left;">${commentText}</p>
+						<p class="h6" style="word-break: break-word; min-height: 5vh!important; text-align:left;">${commentText}</p>
 					  </div>
 					  
 					  <p class="votesCount ml-1" data-id="${commentid}">${0} <i class="fas fa-plus-square ml-1" onclick="plusBtnClick()"></i><i class="fas fa-minus-square" onclick="minusBtnClick()"></i>
@@ -189,13 +196,17 @@ function appendNested(commentid, parentId, userName, commentText) {
 						</div>
 					  </div
 						</p>
-					  <button type="button" class="col-md-11 btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}">Comment</button>
+					  <button type="button" class="col-md-6 float-right btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}">Comment</button>
 				</div>
               <div id=${hash} class="comments"></div>
             </div>
           </div>`);
 	
 	var elementToAppend = $(`.media-body[data-id=${parentId}]`);
+
+	if (elementToAppend.length == 0) {
+		var elementToAppend = $(`#comments`);
+	}
 	var rowElement = elementToAppend.html();
 	
 	elementToAppend.append(blockTemplate);
