@@ -110,7 +110,7 @@ class CommentController extends Controller
                 'users_id' => 'required'
             ]);
 
-            $comments = Comment::find($commentId);
+            $comment = Comment::find($commentId);
 
             /** @noinspection PhpUndefinedFieldInspection */
             $data = [
@@ -121,24 +121,22 @@ class CommentController extends Controller
 
             /** @noinspection PhpUndefinedFieldInspection */
             if($request->vote == "up"){
-                $comment = $comments->first();
 
                 $vote = $comment->votes;
                 $vote++;
 
-                $comments->votes = $vote;
-                $comments->save();
+                $comment->votes = $vote;
+                $comment->save();
             }
 
             /** @noinspection PhpUndefinedFieldInspection */
             if($request->vote == "down"){
-                $comment = $comments->first();
 
                 $vote = $comment->votes;
                 $vote--;
 
-                $comments->votes = $vote;
-                $comments->save();
+                $comment->votes = $vote;
+                $comment->save();
             }
 
             if(CommentVote::create($data)) {
