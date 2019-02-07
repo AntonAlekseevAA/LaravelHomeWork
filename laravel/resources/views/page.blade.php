@@ -15,18 +15,13 @@
     <script type="text/javascript" src="{{ URL::asset('js/md5.js') }}"></script>
     <!------------------------>
 
-    <!--Not need now -->
     <link href="css/comments.css" rel="stylesheet" type="text/css">
     <div class="container">
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
                 <div class="panel panel-default">
-                    <div class="panel-heading">UserId: {{ isset($userId) ? Auth::user()->id : '' }} </div>
                     <div id="hfUserId" style="display: none;" value="{{isset($userId) ? Auth::user()->id : ''}}"></div>
                     <div id="hfUserName" style="display: none;" value="{{isset($userId) ? Auth::user()->name : ''}}"></div>
-                    <div class="panel-body">
-                        Comments list here
-                    </div>
                 </div>
             </div>
 

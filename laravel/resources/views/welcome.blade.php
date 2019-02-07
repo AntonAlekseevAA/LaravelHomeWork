@@ -83,7 +83,7 @@
                 <div class="title m-b-md">
                     Laravel
                 </div>
-				<h1>HYI</h1>
+				<h1><a class="navbar-brand" style="color: gray" href="<?php echo e(url('/comments')); ?>">View comments</a></h1>
 
                 <div class="links">
                     <a href="https://laravel.com/docs">Documentation</a>

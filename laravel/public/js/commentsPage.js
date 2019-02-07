@@ -213,7 +213,7 @@ function appendNested(commentid, parentId, userName, commentText, level) {
 						</div>
 					  </div
 						</p>
-					  <button type="button" class="col-md-6 float-right btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}" data-parent-id="${parentId}">Comment</button>
+					  <button type="button" class="col-md-6 btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}" data-parent-id="${parentId}">Comment</button>
 				</div>
               <div id=${hash} class="comments"></div>
             </div>
