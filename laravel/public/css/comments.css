@@ -19,7 +19,7 @@
 }
 
 .comment-block-new {
-	background: red;
+	background: darkslategray;
 }
 
 .comments-textarea {
@@ -32,5 +32,4 @@
 
 .btn-order-by {
 	width: 200px;
-	/*display: block;*/
 }

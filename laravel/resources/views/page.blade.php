@@ -23,6 +23,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">UserId: {{ isset($userId) ? Auth::user()->id : '' }} </div>
                     <div id="hfUserId" style="display: none;" value="{{isset($userId) ? Auth::user()->id : ''}}"></div>
+                    <div id="hfUserName" style="display: none;" value="{{isset($userId) ? Auth::user()->name : ''}}"></div>
                     <div class="panel-body">
                         Comments list here
                     </div>

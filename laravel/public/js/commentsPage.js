@@ -1,5 +1,9 @@
 var commentsContainer = `<div id="comments" class="card-body border border-right border-2 comment-block" data-id="0">
 
+						</div>
+						<div class="form-group col-md-12 pt-2" style="padding:0;" data-id="0">
+							<textarea class="form-control comments-textarea mb-2" id="exampleFormControlTextarea1" rows="3" data-id="0"></textarea>
+							<button type="button" class="col-md-6 float-right btn btn-secondary btn-sm btnSendComment" onClick="createNewComment()" data-id="0">Comment</button>
 						</div>`;
 
 function loadComments(sortField, sortOrder) {
@@ -105,11 +109,11 @@ function makeComment(x, parentId, depth = 0) {
 					  
 						<div>
 						<div class="form-group col-md-11 comments-edit-hidden" style="padding:0;" data-id="${x.id}">
-							<textarea class="form-control comments-textarea" id="exampleFormControlTextarea1" rows="3" data-id="${x.id}"></textarea>
+							<textarea class="form-control comments-textarea" id="exampleFormControlTextarea1" rows="3" data-id="${x.id}" data-parent-id="${x.reply_id}" data-level="${x.level}"></textarea>
 						</div>
 					  </div
 						</p>
-					  <button type="button" class="col-md-6 float-right btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${x.id}">Comment</button>
+					  <button type="button" class="col-md-6 btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${x.id}" data-parent-id="${x.reply_id}">Comment</button>
 				</div>
               <div id=${idHash} class="comments"></div>
             </div>
@@ -144,6 +148,13 @@ function createNewComment() {
 	
 	var commentText = $(`textarea[data-id="${parentId}"]`).val();
 	var userId = $('#hfUserId').attr('value');
+
+	var level = $(`textarea[data-id="${parentId}"]`).attr('data-level');
+
+	if (level >= 5) {
+		parentId = $(event.target).attr('data-parent-id');
+		level = 4;
+	}
 	
 	if (!userId) {
 		return;
@@ -164,7 +175,14 @@ function createNewComment() {
 		.done(function(data) {
 			console.log(data);
 			// tree = data;
-			appendNested(data.commentId, parentId, userId, commentText);	// TODO add hf userName
+
+			var userName = $('#hfUserName').attr('value');
+			
+			if (!userName) {
+				return;
+			}
+
+			appendNested(data.commentId, parentId, userName, commentText, level);
 		})
 		.fail(function(error) {
 			console.log(error);
@@ -172,8 +190,7 @@ function createNewComment() {
 		});
 }
 
-// commentId + 1 Нельзя делать, так как уже могут быть блоки с таким id, которые идут после.Его может вообще не надо указывать
-function appendNested(commentid, parentId, userName, commentText) {
+function appendNested(commentid, parentId, userName, commentText, level) {
 	
 	var hash = md5((commentid)-Date.now()-Math.random());
 	
@@ -192,11 +209,11 @@ function appendNested(commentid, parentId, userName, commentText) {
 					  
 						<div>
 						<div class="form-group col-md-11 comments-edit-hidden" style="padding:0;" data-id="${commentid}">
-							<textarea class="form-control comments-textarea" id="exampleFormControlTextarea1" rows="3" data-id="${commentid}"></textarea>
+							<textarea class="form-control comments-textarea" id="exampleFormControlTextarea1" rows="3" data-id="${commentid}" data-parent-id="${parentId}" data-level="${level}"></textarea>
 						</div>
 					  </div
 						</p>
-					  <button type="button" class="col-md-6 float-right btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}">Comment</button>
+					  <button type="button" class="col-md-6 float-right btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}" data-parent-id="${parentId}">Comment</button>
 				</div>
               <div id=${hash} class="comments"></div>
             </div>
