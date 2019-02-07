@@ -31,6 +31,46 @@ var tree;
 	}
 	
 	fetchNotSeenComments(userId);
+	
+	var comments = $('.comment-item');
+	
+	$.each(comments, function(i, item) {
+		item.addEventListener("mouseover", function() {
+			var userId = $('#hfUserId').attr('value');
+	
+				if (!$(event.target).hasClass('comment-block-new')) {
+					return;
+				}
+			
+				if (!userId) {
+					return;
+				}
+	
+				var comment = $(event.target); // store event sender. In ajax success handler event.sender is XMLHttpRequest because he trigger callback function.
+				var commentId = $(event.target).attr('data-id');
+			
+				$.ajax({
+					type: 'POST',
+					url: `api/comments/setSeen`,
+					dataType: "json",
+					async:true,
+					data:
+					{
+						"userId": userId,
+						"commentId": commentId
+					}
+				})
+					.done(function(data) {
+						console.log(data);
+						
+						comment.removeClass('comment-block-new');
+						
+					})
+					.fail(function() {
+						alert( "error" );
+					});
+			}, {once : true});
+	});
 });
 
 function makeComment(x, parentId, depth = 0) {
@@ -47,7 +87,7 @@ function makeComment(x, parentId, depth = 0) {
         document.getElementById(parentId).innerHTML = document.getElementById(parentId).innerHTML + (`<div class="media ${x.id}" data-id="${x.id}" data-parent-id="${x.reply_id}">
             <img style="width:30px;" />
             <div class="media-body pt-3 pl-2" data-id="${x.id}">
-				<div class="border rounded-top rounded-top-2 comment-item" onClick="displayEditPanel()" onMouseover="setSeen()" data-id="${x.id}">
+				<div class="border rounded-top rounded-top-2 comment-item" onClick="displayEditPanel()" data-id="${x.id}">
 				<img src="images/img_avatar3.png" alt="x.name" class="pt-2 pr-2 rounded-circle float-xl-right" style="width:50px;">
 				<h5 class="float-xl-right">${x.name}</h5>
 					  <small class="float-sm-left pl-2 border rounded-left"><i>${x.date}</i></small>
@@ -135,7 +175,7 @@ function appendNested(commentid, parentId, userName) {
 	var blockTemplate = $(`<div class="media ${commentid}" data-id="${commentid}" data-parent-id="${parentId}">
             <img style="width:30px;" />
             <div class="media-body pt-3 pl-2" data-id="${commentid}">
-				<div class="border rounded-top rounded-top-2 comment-item" onClick="displayEditPanel()" onMouseover="setSeen()" data-id="${commentid}">
+				<div class="border rounded-top rounded-top-2 comment-item" onClick="displayEditPanel()" data-id="${commentid}">
 				<img src="images/img_avatar3.png" alt="${userName}" class="pt-2 pr-2 rounded-circle float-xl-right" style="width:50px;">
 				<h5 class="float-xl-right">${userName}</h5>
 					  <small class="float-sm-left pl-2 border rounded-left"><i>${Date.now()}</i></small>
@@ -227,38 +267,6 @@ function displayEditPanel() {
 	var commentId = $(event.target).attr('data-id');
 	$(`.form-group[data-id="${commentId}"]`).removeClass('comments-edit-hidden');
 	$(`button[data-id="${commentId}"]`).removeClass('comments-edit-hidden');
-}
-
-function setSeen() {
-	var userId = $('#hfUserId').attr('value');
-	
-	if (!userId) {
-		return;
-	}
-	
-	var comment = $(event.target); // store event sender. In ajax success handler event.sender is XMLHttpRequest because he trigger callback function.
-	var commentId = $(event.target).attr('data-id');
-	
-	$.ajax({
-        type: 'POST',
-        url: `api/comments/setSeen`,
-        dataType: "json",
-        async:true,
-		data:
-		{
-			"userId": userId,
-			"commentId": commentId
-		}
-	})
-		.done(function(data) {
-			console.log(data);
-			
-			comment.removeClass('comment-block-new');
-			
-		})
-		.fail(function() {
-			alert( "error" );
-		});
 }
 
 function fetchNotSeenComments(userId) {
