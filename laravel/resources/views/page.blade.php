@@ -30,7 +30,11 @@
             </div>
 
             <div class="card-header col-md-10 text-center border border-dark border-3">
-                Комментарии
+                <div style="display: block">Комментарии</div>
+                <div class="ml-10">
+                    <button type="button" class="btn btn-dark btn-order-by" data-direction="asc" onclick="sortByDate()">Сортировка по дате</button>
+                    <button type="button" class="btn btn-dark btn-order-by" data-direction="desc" onclick="sortByVotes()">Сортировка по рейтингу</button>
+                </div>
                 <div id="comments" class="card-body border border-right border-2 comment-block">
 
                 </div>

@@ -1,29 +1,32 @@
+function loadComments(sortField, sortOrder) {
+    var tree;
+    $.ajax({
+        type: 'GET',
+        url: `/api/comments?sortField=${sortField}&sortOrder=${sortOrder}`,
+        dataType: "json",
+        async: false,	// need await. All actions available only when page full loaded.
+    })
+        .done(function (data) {
+            console.log(data);
+            tree = data;
+        })
+        .fail(function () {
+            alert("error");
+        });
+
+    var generatedHtml = "";
+
+    for (var i in tree) {
+        generatedHtml = makeComment(tree[i], "comments");
+    }
+}
+
 $(document).ready(function(){
 //TODO Remove. Get data via api
 
-var tree;
-	$.ajax({
-        type: 'GET',
-        url: '/api/comments/',
-        dataType: "json",
-        async:false,	// need await. All actions available only when page full loaded.
-	})
-		.done(function(data) {
-			console.log(data);
-			tree = data;
-		})
-		.fail(function() {
-			alert( "error" );
-		});
-		
-    var generatedHtml = "";
-	
-	for (var i in tree)
-	{
-		generatedHtml = makeComment(tree[i], "comments");
-	}
-	
-	var userId = $('#hfUserId').attr('value');
+    loadComments("date", "desc");
+
+    var userId = $('#hfUserId').attr('value');
 	
 	if (!userId) {
 		$('.btnSendComment').remove();
@@ -88,7 +91,7 @@ function makeComment(x, parentId, depth = 0) {
 				<h5 class="float-xl-right">${x.name}</h5>
 					  <small class="float-sm-left pl-2 border rounded-left"><i>${x.date}</i></small>
 					  <div class="col-md-11 mt-5 pl-2 border rounded-bottom">
-						<p class="h6" style="word-break: break-word; min-height: 15vh!important;">${x.comment}</p>
+						<p class="h6" style="word-break: break-word; min-height: 15vh!important; text-align:left;">${x.comment}</p>
 					  </div>
 					  
 					  <p class="votesCount ml-1" data-id="${x.id}">${x.votes} <i class="fas fa-plus-square ml-1" onclick="plusBtnClick()"></i><i class="fas fa-minus-square" onclick="minusBtnClick()"></i>
@@ -175,7 +178,7 @@ function appendNested(commentid, parentId, userName, commentText) {
 				<h5 class="float-xl-right">${userName}</h5>
 					  <small class="float-sm-left pl-2 border rounded-left"><i>${Date.now()}</i></small>
 					  <div class="col-md-11 mt-5 pl-2 border rounded-bottom">
-						<p class="h6" style="word-break: break-word; min-height: 15vh!important;">${commentText}</p>
+						<p class="h6" style="word-break: break-word; min-height: 15vh!important; text-align:left;">${commentText}</p>
 					  </div>
 					  
 					  <p class="votesCount ml-1" data-id="${commentid}">${0} <i class="fas fa-plus-square ml-1" onclick="plusBtnClick()"></i><i class="fas fa-minus-square" onclick="minusBtnClick()"></i>
@@ -258,6 +261,26 @@ function minusBtnClick() {
 		});
 }
 
+function sortByDate() {
+    var sender = event.target;
+    var sortOrder = $(sender).attr('data-direction');
+
+    loadComments("date", sortOrder);
+
+    var newSortOrder = sortOrder == 'desc' ? 'asc' : 'desc';
+    $(event.target).attr('data-direction', newSortOrder);
+}
+
+function sortByVotes() {
+    var sender = event.target;
+    var sortOrder = $(sender).attr('data-direction');
+
+    loadComments("votes", sortOrder);
+
+    var newSortOrder = sortOrder == 'desc' ? 'asc' : 'desc';
+    $(event.target).attr('data-direction', newSortOrder);
+}
+
 function displayEditPanel() {
 	var commentId = $(event.target).attr('data-id');
 	$(`.form-group[data-id="${commentId}"]`).removeClass('comments-edit-hidden');
@@ -268,7 +291,7 @@ function fetchNotSeenComments(userId) {
 	if (!userId) {
 		return;
 	}
-	
+
 	$.ajax({
         type: 'POST',
         url: `api/comments/getNotSeenComments`,
@@ -281,13 +304,13 @@ function fetchNotSeenComments(userId) {
 	})
 		.done(function(data) {
 			console.log(data);
-			
+
 			$.each(data, function(i, item) {
 				// comment-block-new
 				var id = item.comment_id;
 				$(`.comment-item[data-id="${id}"]`).addClass('comment-block-new');
 			});
-			
+
 		})
 		.fail(function() {
 			alert( "error" );

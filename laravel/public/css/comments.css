@@ -29,3 +29,8 @@
 .comments-edit-hidden {
 	display: none;
 }
+
+.btn-order-by {
+	width: 200px;
+	/*display: block;*/
+}
