@@ -34,7 +34,13 @@ class CommentController extends Controller
         $userId = $request->userId;
         $notSeenComments = collect(NotSeenComment::where('user_id', '=', $userId)->get())->toArray();
 
-        return $notSeenComments;
+        $ids = array();
+
+        foreach ($notSeenComments as $comment) {
+            array_push($ids, ["comment_id" => $comment['comment_id']]);
+        }
+
+        return $ids;
     }
 
     public function deleteSeenComment(Request $request) {

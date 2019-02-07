@@ -27,7 +27,10 @@ var tree;
 	
 	if (!userId) {
 		$('.btnSendComment').remove();
+		$('textarea').remove();
 	}
+	
+	fetchNotSeenComments(userId);
 });
 
 function makeComment(x, parentId, depth = 0) {
@@ -41,10 +44,10 @@ function makeComment(x, parentId, depth = 0) {
 		// static img for example. In real world we can store filename in user profile and insert path inline.
 		// <h4>${x.name} <small><i>${x.date}</i></small></h4>
 		
-        document.getElementById(parentId).innerHTML = document.getElementById(parentId).innerHTML + (`<div class="media">
+        document.getElementById(parentId).innerHTML = document.getElementById(parentId).innerHTML + (`<div class="media ${x.id}" data-id="${x.id}" data-parent-id="${x.reply_id}">
             <img style="width:30px;" />
             <div class="media-body pt-3 pl-2" data-id="${x.id}">
-				<div class="border rounded-top rounded-top-2">
+				<div class="border rounded-top rounded-top-2" onClick="displayEditPanel()">
 				<img src="images/img_avatar3.png" alt="x.name" class="pt-2 pr-2 rounded-circle float-xl-right" style="width:50px;">
 				<h5 class="float-xl-right">${x.name}</h5>
 					  <small class="float-sm-left pl-2 border rounded-left"><i>${x.date}</i></small>
@@ -54,16 +57,13 @@ function makeComment(x, parentId, depth = 0) {
 					  
 					  <p class="votesCount ml-1" data-id="${x.id}">${x.votes} <i class="fas fa-plus-square ml-1" onclick="plusBtnClick()"></i><i class="fas fa-minus-square" onclick="minusBtnClick()"></i>
 					  
-						<!--<p class="h6" style="word-break: break-word; min-height: 15vh!important;">${x.comment}</p>-->
-						<!--<div class="col-md-11 border rounded-bottom">-->
 						<div>
-						<div class="form-group col-md-11" style="padding:0;">
-							<label for="exampleFormControlTextarea1">Example textarea</label>
-							<textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+						<div class="form-group col-md-11 comments-edit-hidden" style="padding:0;" data-id="${x.id}">
+							<textarea class="form-control comments-textarea" id="exampleFormControlTextarea1" rows="3" data-id="${x.id}"></textarea>
 						</div>
 					  </div
 						</p>
-					  <button type="button" class="col-md-11 btn btn-dark btn-sm mt-1 mb-1 btnSendComment" onClick="createNewComment()" data-id="${x.id}">Comment</button>
+					  <button type="button" class="col-md-11 btn btn-dark btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${x.id}">Comment</button>
 				</div>
               <div id=${idHash} class="comments"></div>
             </div>
@@ -118,44 +118,49 @@ function createNewComment() {
 		.done(function(data) {
 			console.log(data);
 			// tree = data;
-			appendNested(data.commentId);
+			appendNested(data.commentId, parentId, userId);	// TODO add hf userName
 		})
-		.fail(function() {
+		.fail(function(error) {
+			console.log(error);
 			alert( "error" );
 		});
 }
 
 // commentId + 1 Нельзя делать, так как уже могут быть блоки с таким id, которые идут после.Его может вообще не надо указывать
-function appendNested(commentid) {
+function appendNested(commentid, parentId, userName) {
 	
 	var hash = md5((commentid)-Date.now()-Math.random());
-	var blockTemplate = $(`<div class="media ${commentid}" data-id="${commentid}" data-parent-id="${commentid}">
-            <img src="img_avatar3.png" alt="hfUserNameValue" class="mr-3 mt-3 rounded-circle" style="width:45px;">
-            <div class="media-body" data-id="${commentid}">
-              <h4>hfUserNameValue<small><i>Posted on Date.now()</i></small></h4>
-			  <i class="fas fa-plus-square" onclick="plusBtnClick()"></i>
-			  <i class="fas fa-minus-square" onclick="minusBtnClick()"></i>
-			  <p class="votesCount" data-id="${commentid}">0</p>
-              <p>textFieldValue</p>
-			  <button data-id="${commentid}" onClick="send()">213</button>
+	var commentText = $('textarea[data-id="48"]').val();
+	
+	var blockTemplate = $(`<div class="media ${commentid}" data-id="${commentid}" data-parent-id="${parentId}">
+            <img style="width:30px;" />
+            <div class="media-body pt-3 pl-2" data-id="${commentid}">
+				<div class="border rounded-top rounded-top-2" onClick="displayEditPanel()">
+				<img src="images/img_avatar3.png" alt="${userName}" class="pt-2 pr-2 rounded-circle float-xl-right" style="width:50px;">
+				<h5 class="float-xl-right">${userName}</h5>
+					  <small class="float-sm-left pl-2 border rounded-left"><i>${Date.now()}</i></small>
+					  <div class="col-md-11 mt-5 pl-2 border rounded-bottom">
+						<p class="h6" style="word-break: break-word; min-height: 15vh!important;">${commentid}</p>
+					  </div>
+					  
+					  <p class="votesCount ml-1" data-id="${commentid}">${0} <i class="fas fa-plus-square ml-1" onclick="plusBtnClick()"></i><i class="fas fa-minus-square" onclick="minusBtnClick()"></i>
+					  
+						<div>
+						<div class="form-group col-md-11 comments-edit-hidden" style="padding:0;" data-id="${commentid}">
+							<textarea class="form-control comments-textarea" id="exampleFormControlTextarea1" rows="3" data-id="${commentid}">${commentText}</textarea>
+						</div>
+					  </div
+						</p>
+					  <button type="button" class="col-md-11 btn btn-dark btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}">Comment</button>
+				</div>
               <div id=${hash} class="comments"></div>
             </div>
           </div>`);
 	
-	
-	
-	/*var element = $(`.media[data-id=${commentid}]`);
-	var newElement = element.clone();
-	newElement.attr('data-parent-id', commentid);*/
-	
-	var elementToAppend = $(`.media-body[data-id=${commentid}]`);
+	var elementToAppend = $(`.media-body[data-id=${parentId}]`);
 	var rowElement = elementToAppend.html();
 	
-	//newElement.addClass('testtest');
-	// newElement.append($(rowElement));
-	(blockTemplate).addClass('testtest');
 	elementToAppend.append(blockTemplate);
-	//blockTemplate.append(elementToAppend);
 }
 
 function plusBtnClick() {
@@ -189,8 +194,6 @@ function plusBtnClick() {
 }
 
 function minusBtnClick() {
-	// alert ('MinusBtn Mock');
-	
 	var userId = $('#hfUserId').attr('value');
 	
 	if (!userId) {
@@ -214,6 +217,35 @@ function minusBtnClick() {
 		.done(function(data) {
 			console.log(data);
 			$(`.votesCount[data-id=${elementId}]`).text(oldValue - 1);
+		})
+		.fail(function() {
+			alert( "error" );
+		});
+}
+
+function displayEditPanel() {
+	var commentId = $(event.target).attr('data-id');
+	$(`.form-group[data-id="${commentId}"]`).removeClass('comments-edit-hidden');
+	$(`button[data-id="${commentId}"]`).removeClass('comments-edit-hidden');
+}
+
+function fetchNotSeenComments(userId) {
+	if (!userId) {
+		return;
+	}
+	
+	$.ajax({
+        type: 'POST',
+        url: `api/comments/getNotSeenComments`,
+        dataType: "json",
+        async:true,
+		data:
+		{
+			"userId": userId
+		}
+	})
+		.done(function(data) {
+			console.log(data);
 		})
 		.fail(function() {
 			alert( "error" );

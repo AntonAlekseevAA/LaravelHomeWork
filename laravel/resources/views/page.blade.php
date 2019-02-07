@@ -31,7 +31,7 @@
 
             <div class="card-header col-md-10 text-center border border-dark border-3">
                 Комментарии
-                <div id="comments" class="card-body border border-right border-2">
+                <div id="comments" class="card-body border border-right border-2 comment-block">
 
                 </div>
             </div>

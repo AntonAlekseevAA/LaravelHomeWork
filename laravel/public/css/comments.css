@@ -12,3 +12,19 @@
     border-top-left-radius: 1.25rem!important;
     border-top-right-radius: 1.25rem!important;
 }
+
+.comment-block {
+	background: #222328;
+	color: lightgray;
+}
+
+.comment-block-new {
+}
+
+.comments-textarea {
+	background-color: darkgray;
+}
+
+.comments-edit-hidden {
+	display: none;
+}
