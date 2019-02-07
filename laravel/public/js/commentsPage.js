@@ -73,16 +73,12 @@ var tree;
 	});
 });
 
+// Use Deep first search to draw  comments tree
 function makeComment(x, parentId, depth = 0) {
-		
-		// Unique comment block id
-		// commentId + 1 Нельзя делать, так как уже могут быть блоки с таким id, которые идут после.Его может вообще не надо указывать
-		
+	
 		var idHash = md5(x.id-x.level-Date.now()-Math.random());
 		
-		// TODO extract template into var
 		// static img for example. In real world we can store filename in user profile and insert path inline.
-		// <h4>${x.name} <small><i>${x.date}</i></small></h4>
 		
         document.getElementById(parentId).innerHTML = document.getElementById(parentId).innerHTML + (`<div class="media ${x.id}" data-id="${x.id}" data-parent-id="${x.reply_id}">
             <img style="width:30px;" />
@@ -103,7 +99,7 @@ function makeComment(x, parentId, depth = 0) {
 						</div>
 					  </div
 						</p>
-					  <button type="button" class="col-md-11 btn btn-dark btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${x.id}">Comment</button>
+					  <button type="button" class="col-md-11 btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${x.id}">Comment</button>
 				</div>
               <div id=${idHash} class="comments"></div>
             </div>
@@ -136,7 +132,7 @@ function makeComment(x, parentId, depth = 0) {
 function createNewComment() {
 	var parentId = $(event.target).attr('data-id');
 	
-	var comment = $(`textarea[data-id="${parentId}"]`).val();
+	var commentText = $(`textarea[data-id="${parentId}"]`).val();
 	var userId = $('#hfUserId').attr('value');
 	
 	if (!userId) {
@@ -152,13 +148,13 @@ function createNewComment() {
 		{
 			"users_id": userId,
 			"reply_id": parentId,
-			"comment": comment
+			"comment": commentText
 		}
 	})
 		.done(function(data) {
 			console.log(data);
 			// tree = data;
-			appendNested(data.commentId, parentId, userId);	// TODO add hf userName
+			appendNested(data.commentId, parentId, userId, commentText);	// TODO add hf userName
 		})
 		.fail(function(error) {
 			console.log(error);
@@ -167,10 +163,9 @@ function createNewComment() {
 }
 
 // commentId + 1 Нельзя делать, так как уже могут быть блоки с таким id, которые идут после.Его может вообще не надо указывать
-function appendNested(commentid, parentId, userName) {
+function appendNested(commentid, parentId, userName, commentText) {
 	
 	var hash = md5((commentid)-Date.now()-Math.random());
-	var commentText = $('textarea[data-id="48"]').val();
 	
 	var blockTemplate = $(`<div class="media ${commentid}" data-id="${commentid}" data-parent-id="${parentId}">
             <img style="width:30px;" />
@@ -180,18 +175,18 @@ function appendNested(commentid, parentId, userName) {
 				<h5 class="float-xl-right">${userName}</h5>
 					  <small class="float-sm-left pl-2 border rounded-left"><i>${Date.now()}</i></small>
 					  <div class="col-md-11 mt-5 pl-2 border rounded-bottom">
-						<p class="h6" style="word-break: break-word; min-height: 15vh!important;">${commentid}</p>
+						<p class="h6" style="word-break: break-word; min-height: 15vh!important;">${commentText}</p>
 					  </div>
 					  
 					  <p class="votesCount ml-1" data-id="${commentid}">${0} <i class="fas fa-plus-square ml-1" onclick="plusBtnClick()"></i><i class="fas fa-minus-square" onclick="minusBtnClick()"></i>
 					  
 						<div>
 						<div class="form-group col-md-11 comments-edit-hidden" style="padding:0;" data-id="${commentid}">
-							<textarea class="form-control comments-textarea" id="exampleFormControlTextarea1" rows="3" data-id="${commentid}">${commentText}</textarea>
+							<textarea class="form-control comments-textarea" id="exampleFormControlTextarea1" rows="3" data-id="${commentid}"></textarea>
 						</div>
 					  </div
 						</p>
-					  <button type="button" class="col-md-11 btn btn-dark btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}">Comment</button>
+					  <button type="button" class="col-md-11 btn btn-secondary btn-sm mt-1 mb-1 btnSendComment comments-edit-hidden" onClick="createNewComment()" data-id="${commentid}">Comment</button>
 				</div>
               <div id=${hash} class="comments"></div>
             </div>
