@@ -226,10 +226,16 @@ class CommentController extends Controller
             $new[$a['reply_id']][] = $a;
         }
         $tree = $this->createTree($new, array($arr[0]), $sortField, $sortOrder);
-        // return collect($tree)->sortByDesc('date')->first()['children'];
 
         $isDesc = ($sortOrder == 'desc' ? true : false);
-        return collect($tree)->sortBy($sortField, SORT_REGULAR, $isDesc)->first()['children'];
+
+        $treeRoot = collect($tree)->sortBy($sortField, SORT_REGULAR, $isDesc)->first();
+
+        if (!array_key_exists('children', $treeRoot)) {
+            return array();
+        };
+
+        return $treeRoot['children'];
     }
 
     /**
