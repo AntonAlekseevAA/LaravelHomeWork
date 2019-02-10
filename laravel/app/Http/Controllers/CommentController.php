@@ -169,6 +169,12 @@ class CommentController extends Controller
 
        foreach ($comments as $key) {
            $user = User::find($key->users_id);
+
+           /* Comment with not exists user id. Skip now.*/
+           if (!$user) {
+               continue;
+           }
+
            $name = $user->name;
 
            $reply = 0;  // Rework as nested level (1-5)
